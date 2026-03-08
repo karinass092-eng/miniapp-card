@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body{
+font-family:Arial;
+padding:20px;
+background:#f2f2f2;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+img{
+width:100%;
+border-radius:10px;
+margin-bottom:10px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+font-size:16px;
+}
+
+.approve{
+background:#2ecc71;
+color:white;
+}
+
+.reject{
+background:#e74c3c;
+color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<img id="photo">
+
+<h2 id="title"></h2>
+
+<p id="description"></p>
+
+<h3 id="price"></h3>
+
+<button class="approve">Approve</button>
+
+<button class="reject">Reject</button>
+
+</div>
+
+</body>
+</html>
