@@ -89,7 +89,7 @@ color:white;
 const params = new URLSearchParams(window.location.search);
 const card_id = params.get("card_id");
 
-fetch("https://markusha.app.n8n.cloud/webhook/get-card?id="+card_id)
+fetch("https://markusha.app.n8n.cloud/webhook/get-card")
 
 .then(res=>res.json())
 
@@ -122,5 +122,6 @@ Telegram.WebApp.close()
 
 </body>
 </html>
+
 
 
