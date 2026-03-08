@@ -89,7 +89,7 @@ color:white;
 const params = new URLSearchParams(window.location.search);
 const card_id = params.get("card_id");
 
-fetch("https://your-n8n-webhook-url/card?id="+card_id)
+fetch("https://markusha.app.n8n.cloud/webhook/get-card?id="+card_id)
 
 .then(res=>res.json())
 
@@ -104,7 +104,7 @@ document.getElementById("price").innerText = "€ " + data.price;
 
 function approve(){
 
-fetch("https://your-n8n-webhook-url/approve?id="+card_id)
+fetch("https://markusha.app.n8n.cloud/webhook/approve?id="+card_id)
 
 Telegram.WebApp.close()
 
@@ -112,7 +112,7 @@ Telegram.WebApp.close()
 
 function reject(){
 
-fetch("https://markusha.app.n8n.cloud/webhook/get-card?id="+card_id)
+fetch("https://markusha.app.n8n.cloud/webhook/reject?id="+card_id)
 
 Telegram.WebApp.close()
 
@@ -122,4 +122,5 @@ Telegram.WebApp.close()
 
 </body>
 </html>
+
 
