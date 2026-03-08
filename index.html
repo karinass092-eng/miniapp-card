@@ -2,35 +2,54 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<title>Product Card</title>
+
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
+
 body{
-font-family:Arial;
+font-family: Arial;
+background:#f3f3f3;
 padding:20px;
-background:#f2f2f2;
 }
 
 .card{
 background:white;
-padding:20px;
 border-radius:10px;
-box-shadow:0 5px 15px rgba(0,0,0,0.1);
+padding:20px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 img{
 width:100%;
-border-radius:10px;
-margin-bottom:10px;
+border-radius:8px;
 }
 
-button{
-width:100%;
-padding:12px;
+.title{
+font-size:22px;
+font-weight:bold;
 margin-top:10px;
-border:none;
+}
+
+.description{
+margin-top:10px;
+color:#555;
+}
+
+.price{
+margin-top:10px;
+font-size:20px;
+font-weight:bold;
+}
+
+.button{
+margin-top:15px;
+padding:15px;
 border-radius:8px;
-font-size:16px;
+text-align:center;
+font-weight:bold;
+cursor:pointer;
 }
 
 .approve{
@@ -44,25 +63,62 @@ color:white;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="card">
 
-<img id="photo">
+<img id="photo" src="" />
 
-<h2 id="title"></h2>
+<div class="title" id="title">Loading...</div>
 
-<p id="description"></p>
+<div class="description" id="description"></div>
 
-<h3 id="price"></h3>
+<div class="price" id="price"></div>
 
-<button class="approve">Approve</button>
+<div class="button approve" onclick="approve()">Approve</div>
 
-<button class="reject">Reject</button>
+<div class="button reject" onclick="reject()">Reject</div>
 
 </div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const card_id = params.get("card_id");
+
+fetch("https://your-n8n-webhook-url/card?id="+card_id)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+document.getElementById("photo").src = data.photo;
+document.getElementById("title").innerText = data.title;
+document.getElementById("description").innerText = data.description;
+document.getElementById("price").innerText = "€ " + data.price;
+
+});
+
+function approve(){
+
+fetch("https://your-n8n-webhook-url/approve?id="+card_id)
+
+Telegram.WebApp.close()
+
+}
+
+function reject(){
+
+fetch("https://your-n8n-webhook-url/reject?id="+card_id)
+
+Telegram.WebApp.close()
+
+}
+
+</script>
 
 </body>
 </html>
