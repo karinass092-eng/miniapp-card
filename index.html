@@ -1,127 +1,45 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Product Card</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-
-body{
-font-family: Arial;
-background:#f3f3f3;
-padding:20px;
-}
-
-.card{
-background:white;
-border-radius:10px;
-padding:20px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-img{
-width:100%;
-border-radius:8px;
-}
-
-.title{
-font-size:22px;
-font-weight:bold;
-margin-top:10px;
-}
-
-.description{
-margin-top:10px;
-color:#555;
-}
-
-.price{
-margin-top:10px;
-font-size:20px;
-font-weight:bold;
-}
-
-.button{
-margin-top:15px;
-padding:15px;
-border-radius:8px;
-text-align:center;
-font-weight:bold;
-cursor:pointer;
-}
-
-.approve{
-background:#2ecc71;
-color:white;
-}
-
-.reject{
-background:#e74c3c;
-color:white;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="card">
-
-<img id="photo" src="" />
-
-<div class="title" id="title">Loading...</div>
-
-<div class="description" id="description"></div>
-
-<div class="price" id="price"></div>
-
-<div class="button approve" onclick="approve()">Approve</div>
-
-<div class="button reject" onclick="reject()">Reject</div>
-
-</div>
-
 <script>
-
 const params = new URLSearchParams(window.location.search);
 const card_id = params.get("card_id");
 
-fetch("https://markusha.app.n8n.cloud/webhook/get-card-new?id="+card_id)
+document.getElementById("title").innerText = "Loading...";
 
-.then(res=>res.json())
+if (!card_id) {
+  document.getElementById("title").innerText = "Ошибка: card_id не передан";
+  document.getElementById("description").innerText = window.location.href;
+} else {
+  fetch("https://markusha.app.n8n.cloud/webhook/get-card-new?id=" + encodeURIComponent(card_id))
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+      return res.json();
+    })
+    .then(data => {
+      console.log("CARD DATA:", data);
 
-.then(data=>{
-document.getElementById("photo").src = data.photo;
-document.getElementById("title").innerText = data.title;
-document.getElementById("description").innerText = data.description;
-document.getElementById("price").innerText = "€ " + data.price;
-});
-
-function approve(){
-
-fetch("https://markusha.app.n8n.cloud/webhook/approve?id="+card_id)
-
-Telegram.WebApp.close()
-
+      document.getElementById("photo").src = data.photo || "";
+      document.getElementById("title").innerText = data.title || "Нет title";
+      document.getElementById("description").innerText = data.description || "Нет description";
+      document.getElementById("price").innerText = data.price ? "€ " + data.price : "Нет price";
+    })
+    .catch(err => {
+      document.getElementById("title").innerText = "Ошибка загрузки";
+      document.getElementById("description").innerText = String(err);
+      document.getElementById("price").innerText = "card_id = " + card_id;
+    });
 }
 
-function reject(){
-
-fetch("https://markusha.app.n8n.cloud/webhook/reject?id="+card_id)
-
-Telegram.WebApp.close()
-
+function approve() {
+  fetch("https://markusha.app.n8n.cloud/webhook/approve?id=" + encodeURIComponent(card_id || ""))
+    .then(() => Telegram.WebApp.close())
+    .catch(err => alert("Approve error: " + err));
 }
 
+function reject() {
+  fetch("https://markusha.app.n8n.cloud/webhook/reject?id=" + encodeURIComponent(card_id || ""))
+    .then(() => Telegram.WebApp.close())
+    .catch(err => alert("Reject error: " + err));
+}
 </script>
-
-</body>
-</html>
-
-
-
-
 
