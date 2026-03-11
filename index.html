@@ -1,193 +1,230 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Product Card</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Listing Card</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      margin: 0;
+      padding: 20px;
+    }
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+    .card {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
 
-<style>
+    h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
 
-body{
-font-family: Arial;
-background:#f3f3f3;
-padding:20px;
-margin:0;
-}
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
 
-.card{
-background:white;
-border-radius:10px;
-padding:20px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
 
-#photo{
-width:100%;
-border-radius:8px;
-margin-bottom:10px;
-display:block;
-min-height:120px;
-object-fit:cover;
-background:#eee;
-}
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
 
-.title{
-font-size:22px;
-font-weight:bold;
-margin-top:10px;
-}
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
 
-.description{
-margin-top:10px;
-color:#555;
-white-space:pre-wrap;
-}
+    button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-.price{
-margin-top:10px;
-font-size:20px;
-font-weight:bold;
-}
+    .approve {
+      background: #2ecc71;
+      color: white;
+    }
 
-.button{
-margin-top:15px;
-padding:15px;
-border-radius:8px;
-text-align:center;
-font-weight:bold;
-cursor:pointer;
-}
+    .reject {
+      background: #e74c3c;
+      color: white;
+    }
 
-.approve{
-background:#2ecc71;
-color:white;
-}
+    .meta {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #777;
+      word-break: break-word;
+    }
 
-.reject{
-background:#e74c3c;
-color:white;
-}
-
-.debug{
-margin-top:12px;
-font-size:12px;
-color:#888;
-word-break:break-word;
-}
-
-</style>
-
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="card">
+    <h2 id="title">Loading...</h2>
 
-<div class="card">
+    <label for="description">Description</label>
+    <textarea id="description"></textarea>
 
-<img id="photo" src="" />
+    <label for="condition">Condition</label>
+    <select id="condition">
+      <option value="New">New</option>
+      <option value="Like New">Like New</option>
+      <option value="Used - Very Good">Used - Very Good</option>
+      <option value="Used - Good">Used - Good</option>
+      <option value="Used - Acceptable">Used - Acceptable</option>
+    </select>
 
-<div class="title" id="title">Loading...</div>
+    <label for="price">Price suggestion</label>
+    <input id="price" type="text" />
 
-<div class="description" id="description"></div>
+    <label for="category">Category</label>
+    <input id="category" type="text" />
 
-<div class="price" id="price"></div>
+    <div class="buttons">
+      <button class="approve" onclick="approveCard()">Approve</button>
+      <button class="reject" onclick="rejectCard()">Reject</button>
+    </div>
 
-<div class="button approve" onclick="approve()">Approve</div>
+    <div class="status" id="status"></div>
+    <div class="meta" id="meta"></div>
+  </div>
 
-<div class="button reject" onclick="reject()">Reject</div>
+  <script>
+    let card = {};
 
-<div class="debug" id="debug"></div>
+    function getCardData() {
+      const params = new URLSearchParams(window.location.search);
+      const dataParam = params.get('data');
 
-</div>
+      if (!dataParam) {
+        return {
+          card_id: '',
+          title: 'No card data',
+          description: '',
+          price: '',
+          condition: 'Used - Good',
+          category: ''
+        };
+      }
 
-<script>
+      try {
+        return JSON.parse(decodeURIComponent(dataParam));
+      } catch (e) {
+        console.error('JSON parse error:', e);
+        return {
+          card_id: '',
+          title: 'Invalid card data',
+          description: '',
+          price: '',
+          condition: 'Used - Good',
+          category: ''
+        };
+      }
+    }
 
-const tg = window.Telegram?.WebApp;
-if (tg) tg.expand();
+    function fillForm() {
+      card = getCardData();
 
-const titleEl = document.getElementById("title");
-const descriptionEl = document.getElementById("description");
-const priceEl = document.getElementById("price");
-const photoEl = document.getElementById("photo");
-const debugEl = document.getElementById("debug");
+      document.getElementById('title').innerText = card.title || '';
+      document.getElementById('description').value = card.description || '';
+      document.getElementById('price').value = card.price || '';
+      document.getElementById('category').value = card.category || '';
 
-const params = new URLSearchParams(window.location.search);
-const card_id = params.get("card_id");
+      const conditionEl = document.getElementById('condition');
+      conditionEl.value = card.condition || 'Used - Good';
 
-debugEl.innerText = "card_id: " + (card_id || "NULL");
+      document.getElementById('meta').innerText =
+        'card_id: ' + (card.card_id || '');
+    }
 
-function showError(message){
-titleEl.innerText="Ошибка";
-descriptionEl.innerText=message;
-priceEl.innerText="";
-}
+    async function approveCard() {
+      const payload = {
+        card_id: card.card_id,
+        title: card.title,
+        description: document.getElementById('description').value,
+        price: document.getElementById('price').value,
+        condition: document.getElementById('condition').value,
+        category: document.getElementById('category').value,
+        status: 'approved'
+      };
 
-fetch("https://markusha.app.n8n.cloud/webhook/get-card-new?card_id="+encodeURIComponent(card_id||""))
+      document.getElementById('status').innerText = 'Sending approve...';
 
-.then(async res=>{
-if(!res.ok){
-throw new Error("HTTP "+res.status);
-}
+      try {
+        const res = await fetch('https://YOUR-N8N-DOMAIN/webhook/approve-card', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
 
-const text=await res.text();
+        const text = await res.text();
+        document.getElementById('status').innerText = 'Approved';
+        console.log(text);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('status').innerText = 'Approve error';
+      }
+    }
 
-if(!text){
-throw new Error("Пустой ответ от n8n");
-}
+    async function rejectCard() {
+      const payload = {
+        card_id: card.card_id,
+        status: 'rejected'
+      };
 
-return JSON.parse(text);
-})
+      document.getElementById('status').innerText = 'Sending reject...';
 
-.then(data=>{
+      try {
+        const res = await fetch('https://YOUR-N8N-DOMAIN/webhook/reject-card', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
 
-debugEl.innerText+="\nDATA: "+JSON.stringify(data);
+        const text = await res.text();
+        document.getElementById('status').innerText = 'Rejected';
+        console.log(text);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('status').innerText = 'Reject error';
+      }
+    }
 
-titleEl.innerText=data.title||"Нет title";
-descriptionEl.innerText=data.description||"Нет description";
-priceEl.innerText=data.price?"€ "+data.price:"Нет price";
-
-if(data.photo){
-photoEl.src=data.photo;
-}else{
-photoEl.style.display="none";
-}
-
-})
-
-.catch(err=>{
-showError(String(err));
-debugEl.innerText+="\nERROR: "+String(err);
-});
-
-function approve(){
-
-fetch("https://markusha.app.n8n.cloud/webhook/approve?card_id="+encodeURIComponent(card_id||""))
-
-.then(()=>{
-if(tg) tg.close();
-})
-
-.catch(err=>{
-alert("Approve error: "+err);
-});
-
-}
-
-function reject(){
-
-fetch("https://markusha.app.n8n.cloud/webhook/reject?card_id="+encodeURIComponent(card_id||""))
-
-.then(()=>{
-if(tg) tg.close();
-})
-
-.catch(err=>{
-alert("Reject error: "+err);
-});
-
-}
-
-</script>
-
+    fillForm();
+  </script>
 </body>
 </html>
